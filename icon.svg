@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-2 {
+        fill: url(#linear-gradient-3);
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        isolation: isolate;
+        opacity: .5;
+      }
+
+      .cls-5 {
+        fill: url(#linear-gradient-5);
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient-4);
+      }
+
+      .cls-4 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="4.25" y1="11.25" x2="27.75" y2="11.25" gradientTransform="translate(0 33) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3abb94"/>
+      <stop offset="1" stop-color="#65cfae"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" y1="11.25" y2="11.25" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-3" y1="21.09" x2="16.04" y2="21.09" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-4" x1="16.04" y1="21.09" y2="21.09" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-5" x1="11.14" y1="29.3" x2="20.94" y2="29.3" xlink:href="#linear-gradient"/>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1-2">
+    <g>
+      <path class="cls-4" d="M27.75,16.91v3.33c0,6.5-5.25,11.75-11.75,11.75s-11.75-5.25-11.75-11.75v-3.31l11.79-5.43,11.72,5.41Z"/>
+      <path class="cls-1" d="M27.75,19.96h0c0,6.37-4.95,11.79-11.31,12.03-6.69.25-12.2-5.1-12.2-11.74v-.25c0-1.86,1.08-3.55,2.77-4.33l9.02-4.16,8.94,4.13c1.69.78,2.77,2.47,2.77,4.33Z"/>
+      <path class="cls-2" d="M16.04,11.51l-11.79,5.43v-8.6c0-1.06,1.1-1.76,2.06-1.32l9.73,4.49h0Z"/>
+      <path class="cls-3" d="M27.75,8.36v8.55l-11.72-5.41,9.66-4.46c.96-.44,2.06.26,2.06,1.32h0Z"/>
+      <path class="cls-5" d="M15.27.39l-3.96,5.52c-.45.62,0,1.49.76,1.49h7.92c.77,0,1.21-.87.76-1.49-1.32-1.84-2.64-3.68-3.96-5.52-.38-.52-1.15-.52-1.53,0Z"/>
+    </g>
+  </g>
+</svg>
