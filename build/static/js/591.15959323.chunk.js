@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdrillu_student_portal=self.webpackChunkdrillu_student_portal||[]).push([[591],{6591:(e,s,t)=>{t.r(s),t.d(s,{default:()=>r});t(9950);var l=t(4414);const r=()=>(0,l.jsx)(l.Fragment,{children:"This is HomePage."})}}]);
