@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* for markdown */
+/* KaTeX CSS for mathematical expressions */
+@import 'katex/dist/katex.min.css';
+
+/* Optional: Custom markdown styles */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.inline-markdown {
+  display: inline;
+}
+
+.inline-markdown p {
+  display: inline;
+  margin: 0;
+}
+
+/*  */
+.shadow-custom {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
