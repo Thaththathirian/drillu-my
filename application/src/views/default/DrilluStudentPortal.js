@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import './DrilluStudentPortal.scss';
 import DrilluLogo from 'components/DrilluLogo';
 
-
-
 const DrillUStudentPortal = () => {
   return (
     <div className="drillu-portal">
@@ -13,7 +11,14 @@ const DrillUStudentPortal = () => {
       <header className="header">
         <div className="container">
           <div className="logo">
-            <DrilluLogo/>
+            <DrilluLogo 
+              width="150px" 
+              height="auto"
+              className="portal-logo"
+              style={{
+                filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.1))"
+              }}
+            />
           </div>
           <nav className="nav">
             {/* <ul className="nav-list">
@@ -283,7 +288,14 @@ const DrillUStudentPortal = () => {
         <div className="container">
           <div className="footer-content">
             <div className="footer-logo">
-              <h3 className="footer-title">DrillU</h3>
+              <DrilluLogo 
+                width="120px" 
+                height="auto"
+                className="footer-logo-svg"
+                style={{
+                  filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.1))"
+                }}
+              />
               <p className="footer-tagline">Empowering students to excel in academics and career</p>
             </div>
             <div className="footer-links">

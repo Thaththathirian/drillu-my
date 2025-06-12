@@ -476,11 +476,13 @@ const Tests = () => {
                                 size="16"
                               />
                               <span className="text-xs font-medium text-blue-800">
-                                Duration
+                                {testStatus === "completed" ? "Time Spent" : "Duration"}
                               </span>
                             </div>
-                            <div className="text-sm font-bold text-blue-900">
-                              {formatDuration(test.duration)}
+                            <div className="text-sm font-bold text-blue-900 ms-4">
+                              {testStatus === "completed" && test.time_spent
+                                ? `${test.time_spent} / ${formatDuration(test.duration)}`
+                                : formatDuration(test.duration)}
                             </div>
                           </div>
                           <div className="bg-green-50 rounded-xl p-3 border border-green-100">
@@ -491,11 +493,13 @@ const Tests = () => {
                                 size="16"
                               />
                               <span className="text-xs font-medium text-green-800">
-                                Total Score
+                                {testStatus === "completed" ? "Score Earned" : "Total Score"}
                               </span>
                             </div>
                             <div className="text-sm font-bold text-green-900">
-                              {test.score || test.total_score || 0}
+                              {testStatus === "completed" && test.earned_score
+                                ? `${test.earned_score} / ${test.score || test.total_score || 0}`
+                                : (test.score || test.total_score || 0)}
                             </div>
                           </div>
                         </div>

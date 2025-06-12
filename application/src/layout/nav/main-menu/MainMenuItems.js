@@ -8,7 +8,7 @@ import { DEFAULT_SETTINGS, USE_MULTI_LANGUAGE } from "config.js";
 import { MENU_PLACEMENT } from "constants.js";
 import CsLineIcons from "cs-line-icons/CsLineIcons";
 import { layoutShowingNavMenu } from "layout/layoutSlice";
-import { menuChangeCollapseAll } from "./menuSlice";
+import { menuChangeCollapseAll, menuChangeAttrMobile, menuChangeNavClasses } from "./menuSlice";
 
 const HorizontalMenuDropdownToggle = memo(
   forwardRef(({ children, onClick, href = "#", active = false }, ref) => (
@@ -36,10 +36,24 @@ const MainMenuItem = memo(
   }) => {
     const dispatch = useDispatch();
     const dropdownMenuRef = useRef();
-    const { collapseAll } = useSelector((state) => state.menu);
+    const { collapseAll, attrMobile, navClasses } = useSelector((state) => state.menu);
     const { showingNavMenu } = useSelector((state) => state.layout);
     const { pathname } = useLocation();
     const { collegeId } = useParams();
+
+    // Check if we're on mobile screen size
+    const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+    useEffect(() => {
+      const checkMobileScreen = () => {
+        setIsMobileScreen(window.innerWidth < 992); // lg breakpoint
+      };
+      
+      checkMobileScreen();
+      window.addEventListener('resize', checkMobileScreen);
+      
+      return () => window.removeEventListener('resize', checkMobileScreen);
+    }, []);
 
     // Ensure path includes collegeId
     const getPathWithCollegeId = (path) => {
@@ -60,6 +74,76 @@ const MainMenuItem = memo(
       useState(isActive);
     const [horizontalDropdownIsOpen, setHorizontalDropdownIsOpen] =
       useState(false);
+
+    // **MAIN FIX: Function to close mobile sidebar - only on mobile screens**
+    const handleMobileMenuClose = () => {
+      console.log("🔄 Checking mobile menu close - Current state:", { 
+        attrMobile, 
+        navClasses, 
+        isMobileScreen 
+      });
+      
+      // ONLY close mobile menu if we're actually on mobile AND mobile menu is open
+      if (isMobileScreen && attrMobile && navClasses && navClasses['mobile-side-in']) {
+        console.log("📱 Mobile menu detected as open, initiating close sequence");
+        
+        // Start the mobile menu closing animation sequence
+        let newNavClasses = {
+          ...navClasses,
+          'mobile-side-out': true,
+          'mobile-side-ready': true,
+          'mobile-side-in': false,
+        };
+        dispatch(menuChangeNavClasses(newNavClasses));
+        
+        setTimeout(() => {
+          newNavClasses = {
+            ...newNavClasses,
+            'mobile-side-ready': false,
+            'mobile-side-out': false,
+            'mobile-top-ready': true,
+          };
+          dispatch(menuChangeNavClasses(newNavClasses));
+        }, 200);
+        
+        setTimeout(() => {
+          newNavClasses = {
+            ...newNavClasses,
+            'mobile-top-in': true,
+            'mobile-top-ready': true,
+          };
+          dispatch(menuChangeNavClasses(newNavClasses));
+          dispatch(menuChangeAttrMobile(false));
+          console.log("✅ Mobile menu closed successfully");
+        }, 230);
+      } else {
+        console.log("ℹ️ Mobile menu close skipped:", {
+          isMobileScreen,
+          attrMobile,
+          hasMobileSideIn: navClasses && navClasses['mobile-side-in']
+        });
+      }
+    };
+
+    // **Navigation click handler with conditional mobile menu close**
+    const handleNavigationClick = (e) => {
+      console.log("🔗 Navigation item clicked:", { 
+        itemPath, 
+        attrMobile, 
+        isMobileScreen 
+      });
+      
+      // Only handle mobile menu closing if we're on a mobile screen
+      if (isMobileScreen && attrMobile) {
+        // Small delay to ensure navigation starts before closing menu
+        setTimeout(() => {
+          handleMobileMenuClose();
+        }, 50);
+      }
+      
+      // Close any open dropdowns
+      dispatch(layoutShowingNavMenu(""));
+    };
 
     const getLabel = (icon, label) => (
       <>
@@ -175,6 +259,7 @@ const MainMenuItem = memo(
           <NavLink
             to={itemPath}
             className={classNames("dropdown-toggle", { active: isActive })}
+            onClick={handleNavigationClick}
           >
             {getLabel(item.icon, item.label)}
           </NavLink>
@@ -216,7 +301,12 @@ const MainMenuItem = memo(
     if (item.isExternal) {
       return (
         <li key={id}>
-          <a href={itemPath} target="_blank" rel="noopener noreferrer">
+          <a 
+            href={itemPath} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            onClick={handleNavigationClick}
+          >
             {getLabel(item.icon, item.label)}
           </a>
         </li>
@@ -229,6 +319,7 @@ const MainMenuItem = memo(
             to={itemPath}
             className={classNames({ active: isActive })}
             activeClassName=""
+            onClick={handleNavigationClick}
           >
             {getLabel(item.icon, item.label)}
           </NavLink>
@@ -242,6 +333,7 @@ const MainMenuItem = memo(
             to={itemPath}
             className={classNames({ active: isActive })}
             activeClassName=""
+            onClick={handleNavigationClick}
           >
             {getLabel(item.icon, item.label)}
           </NavLink>
@@ -254,6 +346,7 @@ const MainMenuItem = memo(
           to={itemPath}
           className={classNames({ active: isActive })}
           activeClassName=""
+          onClick={handleNavigationClick}
         >
           {getLabel(item.icon, item.label)}
         </NavLink>

@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { BASE_URL } from "../../constants";
 import classNames from "classnames";
 import CsLineIcons from "cs-line-icons/CsLineIcons";
+import DrilluLogo from "components/DrilluLogo";
 import { MENU_BEHAVIOUR, MENU_PLACEMENT } from "constants.js";
 
 const NavLogo = () => {
@@ -25,14 +26,17 @@ const NavLogo = () => {
   const isHorizontal =
     placementStatus?.view === MENU_PLACEMENT.Horizontal || attrMobile;
 
-  // Get the appropriate logo size with consistent sizing for all modes
-  const getLogoSize = () => {
+  // Get the appropriate logo dimensions based on layout (made even smaller)
+  const getLogoDimensions = () => {
     if (isHorizontal) {
-      return "55px"; // Size for horizontal navbar
+      // Horizontal navbar - very compact
+      return { width: "80px", height: "auto" };
     } else if (isCollapsed) {
-      return "50px"; // Size for collapsed sidebar
+      // Collapsed sidebar - tiny
+      return { width: "60px", height: "auto" };
     } else {
-      return "80px"; // Size for expanded sidebar
+      // Expanded sidebar - small with padding
+      return { width: "90px", height: "auto" };
     }
   };
 
@@ -43,90 +47,81 @@ const NavLogo = () => {
       display: "flex",
       alignItems: "center", 
       transition: "all 0.3s ease",
+      justifyContent: "center",
     };
 
     if (isHorizontal) {
-      // Top navbar style (for smaller screens)
+      // Top navbar style (for smaller screens) - more compact
       return {
         ...baseStyles,
-        height: "75px",
-        justifyContent: "center",
+        height: "50px",
+        paddingLeft: "15px",
+        paddingRight: "15px",
         position: "relative",
         zIndex: 1050, 
       };
-    // } else if (isCollapsed) {
-    //   // Collapsed sidebar style (for large screens)
-    //   return {
-    //     ...baseStyles,
-    //     justifyContent: "center",
-    //     paddingTop: "15px",
-    //     paddingBottom: "15px",
-    //     marginBottom: "10px",
-    //   };
     } else {
-      // Expanded sidebar style (for large screens)
+      // Sidebar style (for large screens) - with left/right padding
       return {
         ...baseStyles,
-        justifyContent: "center",
-        paddingTop: "10px",
-        paddingBottom: "5px",
-        marginBottom: "5px",
+        paddingTop: "8px",
+        paddingBottom: "8px",
+        paddingLeft: "20px", // Added left padding
+        paddingRight: "20px", // Added right padding
       };
     }
   };
 
-  // Common image style for both logo and fallback
-  const getImageStyle = () => {
+  // Common image style for fallback
+  const getFallbackImageStyle = () => {
+    const dimensions = getLogoDimensions();
     return {
-      height: getLogoSize(),
-      width: getLogoSize(),
+      height: "60px", // Fixed height for college logos
+      width: "auto",
+      maxWidth: dimensions.width,
       display: "block",
       transition: "all 0.3s ease",
-      borderRadius: "50%",
-      objectFit: "cover",
+      borderRadius: "8px",
+      objectFit: "contain",
       boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
     };
   };
 
-  // Matching icon size proportionally to the logo size
-  const getIconSize = () => {
-    const size = parseInt(getLogoSize(), 10);
-    const iconRatio = 0.4; // Icon takes up 60% of the container
-    const iconSize = Math.round(size * iconRatio);
-    return { width: iconSize, height: iconSize };
-  };
+  const dimensions = getLogoDimensions();
 
   return (
-    <div className="nav-logo " style={getLogoContainerStyle()}>
+    <div 
+      className="nav-logo" 
+      style={{
+        ...getLogoContainerStyle(),
+        position: "relative",
+        zIndex: 1050 // Ensure entire nav logo container is above header
+      }}
+    >
       <Link to={`/${activeCollegeId}/dashboard`}>
-        {logoLoaded ? (
-          <img
-            src={`${BASE_URL}/${activeCollegeId}/student/logo`}
-            alt="College Logo"
-            className="logo-image"
-            style={getImageStyle()}
-            onError={() => {
-              setLogoLoaded(false);
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              ...getImageStyle(),
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#f5f5f5",
-            }}
-          >
-            <CsLineIcons
-              icon="imagePlus"
-              width={getIconSize().width}
-              height={getIconSize().height}
-              viewBox="0 0 24 24"
-              stroke="#a5a5a5"
-              style={{
-                transform: "translateY(-1px)", // try -1px to -2px to align center
+        {/* Always show the DrilluLogo as primary */}
+        <DrilluLogo
+          width={dimensions.width}
+          height={dimensions.height}
+          className="drillu-logo"
+          style={{
+            transition: "all 0.3s ease",
+            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+            position: "relative",
+            zIndex: 1050 // Ensure logo and sidebar are above header
+          }}
+        />
+        
+        {/* Optionally show college logo as overlay or fallback */}
+        {logoLoaded && (
+          <div style={{ display: "none" }}>
+            <img
+              src={`${BASE_URL}/${activeCollegeId}/student/logo`}
+              alt="College Logo"
+              className="college-logo-fallback"
+              style={getFallbackImageStyle()}
+              onError={() => {
+                setLogoLoaded(false);
               }}
             />
           </div>

@@ -280,7 +280,7 @@ const TestResults = () => {
   // Header Component with cache status
   const TestResultsHeader = () => (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0  pt-5">
         <div className="flex items-center">
           <BarChart3 className="text-blue-600 mr-4" size={32} />
           <div>

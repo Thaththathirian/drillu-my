@@ -118,7 +118,6 @@ const DashboardCounts = () => {
   const mcqStats = dashboardData?.mcq_stats || {};
   const solvedQuestions = dashboardData?.solved_questions || {};
   const difficultyLevels = solvedQuestions?.difficulty_levels || {};
-  const monthlyContributions = contributions?.monthly_contributions || [];
 
   const completionPercentage =
     dashboardData?.total_tests > 0
@@ -131,7 +130,7 @@ const DashboardCounts = () => {
   const hasQuestions = solvedQuestions?.total?.total > 0;
   const hasCodingStats = Object.keys(codingStats).length > 0;
   const hasMcqStats = Object.keys(mcqStats).length > 0;
-  const hasContributions = Object.keys(contributions).length > 0;
+  const hasContributions = Object.keys(contributions).length > 0 && contributions.total_days > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -332,12 +331,11 @@ const DashboardCounts = () => {
             </div>
           )}
 
-          {/* Contributions Section */}
+          {/* Contributions Section - Full Width */}
           {hasContributions && (
-            <ContributionsComponent
-              contributions={contributions}
-              monthlyContributions={monthlyContributions}
-            />
+            <div className="mb-8">
+              <ContributionsComponent contributions={contributions} />
+            </div>
           )}
         </div>
       </div>
