@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   BookOpen,
   Award,
@@ -18,6 +18,178 @@ import DrilluLogo from "components/DrilluLogo";
 import { ReactComponent as Logo } from "../../assets/drillu-cover.svg";
 
 const DrillUStudentPortal = () => {
+  const observerRef = useRef();
+  const statsRef = useRef();
+
+  useEffect(() => {
+    // Intersection Observer for reveal animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all elements with reveal class
+    document.querySelectorAll('.reveal').forEach(el => observerRef.current.observe(el));
+
+    // Progressive number counting animation
+    const animateNumbers = () => {
+      const counters = document.querySelectorAll('.stat-number');
+      counters.forEach(counter => {
+        const target = parseInt(counter.innerText.replace(/[^\d]/g, ''));
+        const suffix = counter.innerText.replace(/[\d]/g, '');
+        let current = 0;
+        const increment = target / 100;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          counter.innerText = Math.floor(current) + suffix;
+        }, 20);
+      });
+    };
+
+    // Trigger number animation when stats come into view
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateNumbers();
+          statsObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    if (statsRef.current) {
+      statsObserver.observe(statsRef.current);
+    }
+
+    // Add sparkle effect function
+    const createSparkle = (x, y) => {
+      const sparkle = document.createElement('div');
+      sparkle.style.position = 'absolute';
+      sparkle.style.left = x + 'px';
+      sparkle.style.top = y + 'px';
+      sparkle.style.width = '4px';
+      sparkle.style.height = '4px';
+      sparkle.style.background = 'white';
+      sparkle.style.borderRadius = '50%';
+      sparkle.style.pointerEvents = 'none';
+      sparkle.style.animation = 'sparkle 0.6s ease-out forwards';
+      document.body.appendChild(sparkle);
+      
+      setTimeout(() => sparkle.remove(), 600);
+    };
+
+    // Add sparkle keyframe
+    const sparkleStyle = document.createElement('style');
+    sparkleStyle.textContent = `
+      @keyframes sparkle {
+        0% {
+          transform: scale(0) rotate(0deg);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1) rotate(180deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(0) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(sparkleStyle);
+
+    // Add mouse follow effect for cards
+    document.querySelectorAll('.portal-card, .service-item').forEach(card => {
+      const handleMouseMove = (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / 10;
+        const rotateY = (centerX - x) / 10;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+      };
+      
+      const handleMouseLeave = () => {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+      };
+
+      card.addEventListener('mousemove', handleMouseMove);
+      card.addEventListener('mouseleave', handleMouseLeave);
+    });
+
+    // Add ripple effect
+    const createRipple = (event) => {
+      const button = event.currentTarget;
+      const circle = document.createElement('span');
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const radius = diameter / 2;
+
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+      circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+      circle.classList.add('ripple');
+
+      const ripple = button.getElementsByClassName('ripple')[0];
+      if (ripple) {
+        ripple.remove();
+      }
+
+      button.appendChild(circle);
+    };
+
+    // Add ripple style
+    const rippleStyle = document.createElement('style');
+    rippleStyle.textContent = `
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0);
+        animation: rippleEffect 0.6s linear;
+        pointer-events: none;
+      }
+      
+      @keyframes rippleEffect {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(rippleStyle);
+
+    // Apply effects to buttons
+    document.querySelectorAll('.btn, .portal-card, .service-item').forEach(el => {
+      el.style.position = 'relative';
+      el.style.overflow = 'hidden';
+      el.addEventListener('click', createRipple);
+    });
+
+    // Cleanup function
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+      statsObserver.disconnect();
+    };
+  }, []);
+
   return (
     <div className="drillu-portal">
       {/* Header */}
@@ -46,67 +218,66 @@ const DrillUStudentPortal = () => {
       </header>
 
       {/* Hero Section */}
-     <section className="hero">
-  <div className="container">
-    <div className="hero-content mb-0">
-      <h1 className="hero-title mb-5 leading-relaxed md:text-6xl md:leading-normal text-center">
-        Prepare. Grow. Succeed.
-      </h1>
-      <p className="hero-subtitle">
-        Your comprehensive platform for campus interview preparation and
-        career success
-      </p>
-      <div className="hero-statistics mb-3">
-        <div className="stat">
-          <span className="stat-number">95%</span>
-          <span className="stat-label">Placement Success</span>
+      <section className="hero">
+        <div className="container">
+          <div className="hero-content mb-0 fade-in-left">
+            <h1 className="hero-title mb-5 leading-relaxed md:text-6xl md:leading-normal text-center">
+              Prepare. Grow. Succeed.
+            </h1>
+            <p className="hero-subtitle fade-in-up stagger-1">
+              Your comprehensive platform for campus interview preparation and
+              career success
+            </p>
+            <div className="hero-statistics mb-3" ref={statsRef}>
+              <div className="stat scale-in stagger-1 glow-effect">
+                <span className="stat-number">95%</span>
+                <span className="stat-label">Placement Success</span>
+              </div>
+              <div className="stat scale-in stagger-2 glow-effect">
+                <span className="stat-number">5000+</span>
+                <span className="stat-label">Students Trained</span>
+              </div>
+              <div className="stat scale-in stagger-3 glow-effect">
+                <span className="stat-number">100+</span>
+                <span className="stat-label">Partner Companies</span>
+              </div>
+            </div>
+          </div>
+          <div className="hero-image fade-in-right">
+            <Logo className="enhanced-animation shine-effect" />
+            <div className="placeholder-image"></div>
+          </div>
         </div>
-        <div className="stat">
-          <span className="stat-number">5000+</span>
-          <span className="stat-label">Students Trained</span>
-        </div>
-        <div className="stat">
-          <span className="stat-number">100+</span>
-          <span className="stat-label">Partner Companies</span>
-        </div>
-      </div>
-    </div>
-    <div className="hero-image">
-      {/* Apply the enhanced-animation class for more dynamic effect */}
-      <Logo className="enhanced-animation" />
-      <div className="placeholder-image"></div>
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* About Section */}
       <section id="about" className="about">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header reveal">
             <h2 className="section-title">About DrillU</h2>
             <p className="section-subtitle">Your partner in career success</p>
           </div>
           <div className="about-content">
-            <div className="about-text">
-              <p>
+            <div className="about-text reveal">
+              <p className="fade-in-up stagger-1">
                 DrillU is a powerful platform designed to help students prepare
                 for campus interviews and build their careers with confidence.
                 It provides personalized support and tools to ensure students
                 achieve their professional goals.
               </p>
-              <p>
+              <p className="fade-in-up stagger-2">
                 Created by a team of 20 experienced placement professionals,
                 along with corporate trainers and academicians, DrillU offers
                 real-world insights and practical training that match industry
                 needs.
               </p>
-              <p>
+              <p className="fade-in-up stagger-3">
                 With expert-designed question banks, mock interviews,
                 mentorship, and placement opportunities, DrillU supports
                 students, placement officers, and colleges in achieving
                 placement success.
               </p>
-              <div className="about-highlight">
+              <div className="about-highlight scale-in stagger-4">
                 <p>
                   DrillU is more than just a preparation tool—it's a partner in
                   every student's career journey, helping them prepare, grow,
@@ -114,9 +285,9 @@ const DrillUStudentPortal = () => {
                 </p>
               </div>
             </div>
-            <div className="about-features">
-              <div className="feature">
-                <div className="feature-icon">
+            <div className="about-features reveal">
+              <div className="feature fade-in-right stagger-1">
+                <div className="feature-icon floating">
                   <Users size={24} />
                 </div>
                 <div className="feature-text">
@@ -127,8 +298,8 @@ const DrillUStudentPortal = () => {
                   </p>
                 </div>
               </div>
-              <div className="feature">
-                <div className="feature-icon">
+              <div className="feature fade-in-right stagger-2">
+                <div className="feature-icon floating">
                   <Trophy size={24} />
                 </div>
                 <div className="feature-text">
@@ -138,8 +309,8 @@ const DrillUStudentPortal = () => {
                   </p>
                 </div>
               </div>
-              <div className="feature">
-                <div className="feature-icon">
+              <div className="feature fade-in-right stagger-3">
+                <div className="feature-icon floating">
                   <Briefcase size={24} />
                 </div>
                 <div className="feature-text">
@@ -159,9 +330,9 @@ const DrillUStudentPortal = () => {
         <div className="container">
           <div className="portals-grid">
             {/* Assessment Portal Card */}
-            <div className="portal-card assessment">
+            <div className="portal-card assessment reveal glow-effect">
               <div className="card-header">
-                <div className="card-icon">
+                <div className="card-icon floating">
                   <BookOpen size={32} />
                 </div>
                 <h3 className="card-title">Assessment Portal</h3>
@@ -171,28 +342,25 @@ const DrillUStudentPortal = () => {
                 campus interviews
               </p>
               <ul className="card-features">
-                <li>
+                <li className="fade-in-up stagger-1">
                   <Check size={16} /> Technical & Aptitude Assessments
                 </li>
-                <li>
+                <li className="fade-in-up stagger-2">
                   <Check size={16} /> 30,000+ Questions from 100+ Companies
                 </li>
-                <li>
+                <li className="fade-in-up stagger-3">
                   <Check size={16} /> Real-time Performance Tracking
                 </li>
-                <li>
+                <li className="fade-in-up stagger-4">
                   <Check size={16} /> Detailed Score Reports & Analysis
                 </li>
               </ul>
-              {/* <Link to="/" className="btn btn-card">
-                Access Assessment Portal <ChevronRight size={18} />
-              </Link> */}
             </div>
 
             {/* Placement Training Card */}
-            <div className="portal-card training">
+            <div className="portal-card training reveal glow-effect">
               <div className="card-header">
-                <div className="card-icon">
+                <div className="card-icon floating">
                   <Award size={32} />
                 </div>
                 <h3 className="card-title">Placement Training</h3>
@@ -202,28 +370,25 @@ const DrillUStudentPortal = () => {
                 resources
               </p>
               <ul className="card-features">
-                <li>
+                <li className="fade-in-up stagger-1">
                   <Check size={16} /> Mock Interviews & Feedback Sessions
                 </li>
-                <li>
+                <li className="fade-in-up stagger-2">
                   <Check size={16} /> Resume Building & Profile Enhancement
                 </li>
-                <li>
+                <li className="fade-in-up stagger-3">
                   <Check size={16} /> Industry Expert Mentorship
                 </li>
-                <li>
+                <li className="fade-in-up stagger-4">
                   <Check size={16} /> Campus Drive Notifications
                 </li>
               </ul>
-              {/* <Link to="/" className="btn btn-card">
-                Start Placement Training <ChevronRight size={18} />
-              </Link> */}
             </div>
 
             {/* Coding Portal Card */}
-            <div className="portal-card coding">
+            <div className="portal-card coding reveal glow-effect">
               <div className="card-header">
-                <div className="card-icon">
+                <div className="card-icon floating">
                   <Code size={32} />
                 </div>
                 <h3 className="card-title">Coding Challenges</h3>
@@ -233,22 +398,19 @@ const DrillUStudentPortal = () => {
                 competitions
               </p>
               <ul className="card-features">
-                <li>
+                <li className="fade-in-up stagger-1">
                   <Check size={16} /> Regular Coding Competitions
                 </li>
-                <li>
+                <li className="fade-in-up stagger-2">
                   <Check size={16} /> Prizes and Placement Opportunities
                 </li>
-                <li>
+                <li className="fade-in-up stagger-3">
                   <Check size={16} /> In-depth Solutions & Explanations
                 </li>
-                <li>
+                <li className="fade-in-up stagger-4">
                   <Check size={16} /> Practice with Real Interview Problems
                 </li>
               </ul>
-              {/* <Link to="/" className="btn btn-card">
-                Explore Coding Challenges <ChevronRight size={18} />
-              </Link> */}
             </div>
           </div>
         </div>
@@ -257,7 +419,7 @@ const DrillUStudentPortal = () => {
       {/* Services Section */}
       <section id="services" className="services">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header reveal">
             <h2 className="section-title">Why Choose DrillU?</h2>
             <p className="section-subtitle">
               Comprehensive career preparation services
@@ -265,8 +427,8 @@ const DrillUStudentPortal = () => {
           </div>
           <div className="container mx-auto px-4 sm:px-8 lg:px-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="service-item gap-1">
-                <div className="service-icon">
+              <div className="service-item gap-1 reveal shine-effect">
+                <div className="service-icon floating">
                   <FileText size={24} />
                 </div>
                 <h3 className="service-title font-bold pt-1">
@@ -277,8 +439,8 @@ const DrillUStudentPortal = () => {
                   questions tailored for campus interviews.
                 </p>
               </div>
-              <div className="service-item gap-1">
-                <div className="service-icon">
+              <div className="service-item gap-1 reveal shine-effect">
+                <div className="service-icon floating">
                   <Star size={24} />
                 </div>
                 <h3 className="service-title font-bold pt-1">
@@ -289,8 +451,8 @@ const DrillUStudentPortal = () => {
                   curve and comprehensive quantitative analysis.
                 </p>
               </div>
-              <div className="service-item gap-1">
-                <div className="service-icon">
+              <div className="service-item gap-1 reveal shine-effect">
+                <div className="service-icon floating">
                   <Users size={24} />
                 </div>
                 <h3 className="service-title font-bold pt-1">
@@ -301,8 +463,8 @@ const DrillUStudentPortal = () => {
                   mentorship from industry experts.
                 </p>
               </div>
-              <div className="service-item gap-1">
-                <div className="service-icon">
+              <div className="service-item gap-1 reveal shine-effect">
+                <div className="service-icon floating">
                   <Code size={24} />
                 </div>
                 <h3 className="service-title font-bold pt-1">
@@ -313,8 +475,8 @@ const DrillUStudentPortal = () => {
                   placement opportunities.
                 </p>
               </div>
-              <div className="service-item gap-1">
-                <div className="service-icon">
+              <div className="service-item gap-1 reveal shine-effect">
+                <div className="service-icon floating">
                   <Briefcase size={24} />
                 </div>
                 <h3 className="service-title font-bold pt-1">
@@ -325,8 +487,8 @@ const DrillUStudentPortal = () => {
                   with our integrated job portal.
                 </p>
               </div>
-              <div className="service-item gap-1">
-                <div className="service-icon">
+              <div className="service-item gap-1 reveal shine-effect">
+                <div className="service-icon floating">
                   <Trophy size={24} />
                 </div>
                 <h3 className="service-title font-bold pt-1">
@@ -345,15 +507,14 @@ const DrillUStudentPortal = () => {
       {/* Testimonial Section */}
       <section id="testimonials" className="testimonials">
         <div className="container">
-          <div className="section-header">
+          <div className="section-header reveal">
             <h2 className="section-title">Success Stories</h2>
             <p className="section-subtitle">
               See what our students have achieved
             </p>
           </div>
           <div className="testimonial-slider">
-            {/* Would be a carousel in real implementation */}
-            <div className="testimonial-card">
+            <div className="testimonial-card reveal glass">
               <div className="testimonial-content">
                 <p>
                   "With DrillU's comprehensive preparation, I secured a position
@@ -362,7 +523,7 @@ const DrillUStudentPortal = () => {
                 </p>
               </div>
               <div className="testimonial-author">
-                <div className="author-avatar">{/* Avatar placeholder */}</div>
+                <div className="author-avatar"></div>
                 <div className="author-info">
                   <h4 className="author-name">Priya Sharma</h4>
                   <p className="author-position">
@@ -378,20 +539,17 @@ const DrillUStudentPortal = () => {
       {/* CTA Section */}
       <section className="cta">
         <div className="container">
-          <div className="cta-content">
-            <h2 className="cta-title">Ready to accelerate your career?</h2>
-            <p className="cta-text">
+          <div className="cta-content reveal">
+            <h2 className="cta-title fade-in-up">Ready to accelerate your career?</h2>
+            <p className="cta-text fade-in-up stagger-1">
               Join over 5000+ students who have successfully transformed their
               career journey with DrillU
             </p>
             <div className="cta-buttons">
-              {/* <Link to="/" className="btn btn-primary btn-large">
-                Start Your Journey Today <ArrowRight size={18} />
-              </Link> */}
               <a
                 to="/"
                 href="mailto:info@drillu.in"
-                className="btn btn-secondary btn-large"
+                className="btn btn-secondary btn-large scale-in stagger-2 shine-effect"
               >
                 Contact Us
               </a>
@@ -407,62 +565,6 @@ const DrillUStudentPortal = () => {
           rights reserved.
         </p>
       </div>
-      {/* Footer */}
-      {/* <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-logo">
-              <DrilluLogo 
-                width="120px" 
-                height="auto"
-                className="footer-logo-svg"
-                style={{
-                  filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.1))"
-                }}
-              />
-              <p className="footer-tagline">Empowering students to excel in academics and career</p>
-            </div>
-            <div className="footer-links">
-              <div className="footer-col">
-                <h4>Platform</h4>
-                <ul>
-                  <li><span>Assessment Portal</span></li>
-                  <li><span>Placement Training</span></li>
-                  <li><span>Coding Challenges</span></li>
-                  <li><span>Mentorship</span></li>
-                </ul>
-              </div>
-              <div className="footer-col">
-                <h4>Company</h4>
-                <ul>
-                  <li><span>About Us</span></li>
-                  <li><span>Our Team</span></li>
-                  <li><span>Partner Companies</span></li>
-                  <li><span>Contact Us</span></li>
-                </ul>
-              </div>
-              <div className="footer-col">
-                <h4>Resources</h4>
-                <ul>
-                  <li><span>Blog</span></li>
-                  <li><span>FAQs</span></li>
-                  <li><span>Testimonials</span></li>
-                  <li><span>Support</span></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <div className="flex justify-center">
-
-            <p className="copyright">© 2025 DrillU Career Success Platform. All rights reserved.</p>
-            </div>
-            <div className="footer-social">
-              Social icons would go here
-            </div>
-          </div>
-        </div>
-      </footer> */}
     </div>
   );
 };
