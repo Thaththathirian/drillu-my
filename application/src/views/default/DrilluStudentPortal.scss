@@ -179,12 +179,23 @@ body {
   }
 }
 
+
 // Hero Section
+// Add this to your SCSS file (DrilluStudentPortal.scss)
+// Enhanced Hero Section SCSS with animated SVG and improved title
+
 .hero {
   padding: 80px 0 100px;
   background-color: $light-color;
   position: relative;
   overflow: hidden;
+  
+  @media (max-width: 1024px) {
+    padding: 60px 0 60px;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+  }
   
   &::before {
     content: '';
@@ -199,44 +210,98 @@ body {
   }
   
   .container {
-    @include flex(row, space-between, center);
+    @include flex(row, center, center);
     position: relative;
     z-index: 1;
+    gap: 0px;
+    
+    @media (min-width: 1024px) {
+      gap: 100px;
+    }
+    
+    @media (max-width: 1024px) {
+      flex-direction: column;
+      text-align: center;
+      width: 100%;
+    }
   }
   
   &-content {
     flex: 1;
     max-width: 600px;
+    text-align: center;
   }
   
   &-title {
-    font-size: 3.5rem;
+    // Increased font size for desktop
+    font-size: 4.5rem;
     font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 16px;
-    color: $dark-color;
+    line-height: 1.1;
+    margin-bottom: 24px;
     
-    span {
-      @include gradient(to right, $primary-color, $secondary-color);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    // Enhanced gradient effect with original colors
+    background: linear-gradient(
+      120deg,
+      $dark-color 0%,
+      $primary-color 20%,
+      $secondary-color 40%,
+      $primary-color 60%,
+      $dark-color 80%,
+      $primary-color 100%
+    );
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
+    // More pronounced animation
+    animation: enhancedTextGradient 6s ease-in-out infinite;
+    
+    // Add subtle text shadow for depth
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    
+    @media (max-width: 1200px) {
+      font-size: 4rem;
+    }
+    
+    @media (max-width: 768px) {
+      font-size: 3rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 2.2rem;
     }
   }
   
   &-subtitle {
     font-size: 1.2rem;
     color: $text-light;
-    margin-bottom: 32px;
+    margin-bottom: 48px;
     max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    
+    @media (max-width: 1024px) {
+      margin-bottom: 40px;
+    }
   }
   
   &-statistics {
-    @include flex(row, flex-start, center);
+    @include flex(row, center, center);
     gap: 40px;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
+    
+    @media (max-width: 1024px) {
+      margin-bottom: 50px;
+    }
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 20px;
+    }
     
     .stat {
-      @include flex(column, center, flex-start);
+      @include flex(column, center, center);
       
       &-number {
         font-size: 2.5rem;
@@ -254,7 +319,7 @@ body {
   }
   
   &-cta {
-    @include flex(row, flex-start, center);
+    @include flex(row, center, center);
     gap: 16px;
   }
   
@@ -263,8 +328,26 @@ body {
     max-width: 500px;
     position: relative;
     border-radius: $border-radius;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: visible; // Changed to visible for floating effect
+    
+    // Animated SVG container
+    svg {
+      width: 100%;
+      height: auto;
+      animation: floatingSVG 4s ease-in-out infinite;
+      filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.1));
+      transition: transform 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.02) translateY(-5px);
+        filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.15));
+      }
+      
+      // Add subtle glow effect to SVG elements
+      * {
+        transition: all 0.3s ease;
+      }
+    }
 
     .image-slideshow {
       position: relative;
@@ -295,6 +378,85 @@ body {
     }
   }
 }
+
+// Enhanced keyframe animation for more pronounced text gradient
+@keyframes enhancedTextGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Floating animation for SVG
+@keyframes floatingSVG {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-0.5deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+// Additional subtle pulse effect for SVG (optional)
+@keyframes subtlePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// You can also add this class to make SVG even more dynamic
+.hero-image svg.enhanced-animation {
+  animation: floatingSVG 4s ease-in-out infinite, subtlePulse 6s ease-in-out infinite;
+}
+
+// Responsive adjustments for the floating effect
+@media (max-width: 768px) {
+  .hero-image svg {
+    animation: floatingSVG 5s ease-in-out infinite; // Slower on mobile
+  }
+  
+  @keyframes floatingSVG {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-6px); // Reduced movement on mobile
+    }
+  }
+}
+
+// Performance optimization
+.hero-image svg {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
 
 // Section Styles
 .section {
