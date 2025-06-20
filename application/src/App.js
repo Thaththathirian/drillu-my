@@ -15,6 +15,7 @@ import "./App.css";
 const App = () => {
   const { currentUser, isLogin, loading } = useSelector((state) => state.auth);
   const [showPortalSkeleton, setShowPortalSkeleton] = useState(false);
+  const [portalLoaded, setPortalLoaded] = useState(false);
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
@@ -30,17 +31,20 @@ const App = () => {
     // Only show portal skeleton if we're on the main portal page
     if (isPortalPage) {
       setShowPortalSkeleton(true);
-      // Remove skeleton after a short delay to show the actual portal
+      setPortalLoaded(false);
+      
+      // Show skeleton for longer duration and then load portal
       const timer = setTimeout(() => {
         setShowPortalSkeleton(false);
-      }, 1000); // Reduced to 1 second
+        setPortalLoaded(true);
+      }, 1500); // Show skeleton for 1.5 seconds
       
       return () => clearTimeout(timer);
-    }
-
-    // For other pages, check auth immediately without delays
-    if (activeCollegeId) {
-      dispatch(checkAuth());
+    } else {
+      // For other pages with college ID, check auth immediately
+      if (activeCollegeId) {
+        dispatch(checkAuth());
+      }
     }
   }, [dispatch, isPortalPage, activeCollegeId]);
 
@@ -64,9 +68,14 @@ const App = () => {
     }
   }, [isLogin, location.pathname, activeCollegeId, history]);
 
-  // Show portal skeleton only for the main portal page
+  // Show portal skeleton ONLY for the main portal page
   if (isPortalPage && showPortalSkeleton) {
     return <DrillUPortalSkeleton />;
+  }
+
+  // Show portal content ONLY after skeleton is done
+  if (isPortalPage && portalLoaded) {
+    return <DrilluStudentPortal />;
   }
 
   // Handle missing college ID redirect
@@ -74,7 +83,7 @@ const App = () => {
     return <Redirect to={`/${cachedCollegeId}${location.pathname}`} />;
   }
 
-  // Handle completely invalid access
+  // Handle completely invalid access - show portal directly (no skeleton for invalid access)
   if (!activeCollegeId) {
     return <DrilluStudentPortal />;
   }
@@ -209,46 +218,37 @@ const App = () => {
             </Switch>
           </Layout>
         ) : (
-          // Show minimal loading for auth check without skeleton
-          loading ? (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 text-sm">Loading...</p>
-              </div>
-            </div>
-          ) : (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-              <div className="text-center max-w-md mx-auto p-6">
-                <div 
-                  className="bg-white rounded-3xl p-8"
+          // Show auth required message immediately without loading spinner
+          <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+            <div className="text-center max-w-md mx-auto p-6">
+              <div 
+                className="bg-white rounded-3xl p-8"
+                style={{
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                }}
+              >
+                <div className="text-gray-600 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
+                <p className="text-gray-600 mb-6">Please log in to access this page.</p>
+                <button 
+                  onClick={() => {
+                    window.history.replaceState(null, '', `/${activeCollegeId}/login`);
+                    history.replace(`/${activeCollegeId}/login`);
+                  }}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors w-full"
                   style={{
-                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                    boxShadow: "0 4px 14px 0 rgba(59, 130, 246, 0.25)",
                   }}
                 >
-                  <div className="text-gray-600 mb-4">
-                    <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
-                  <p className="text-gray-600 mb-6">Please log in to access this page.</p>
-                  <button 
-                    onClick={() => {
-                      window.history.replaceState(null, '', `/${activeCollegeId}/login`);
-                      history.replace(`/${activeCollegeId}/login`);
-                    }}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors w-full"
-                    style={{
-                      boxShadow: "0 4px 14px 0 rgba(59, 130, 246, 0.25)",
-                    }}
-                  >
-                    Go to Login
-                  </button>
-                </div>
+                  Go to Login
+                </button>
               </div>
             </div>
-          )
+          </div>
         )}
       </Route>
 

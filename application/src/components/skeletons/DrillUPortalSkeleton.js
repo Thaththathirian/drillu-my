@@ -56,9 +56,10 @@ const DrillUPortalSkeleton = () => {
               </div>
             </div>
             
-            {/* Right Image */}
+            {/* Right Image - SVG Skeleton */}
             <div className="flex justify-center lg:justify-end">
-              <div className="w-75 h-75 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-gray-200 rounded-2xl animate-pulse"></div>
+              <div className="w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 bg-gray-200 rounded-2xl animate-pulse relative overflow-hidden">
+              </div>
             </div>
           </div>
         </div>
