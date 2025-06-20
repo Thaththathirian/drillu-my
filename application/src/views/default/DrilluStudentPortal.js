@@ -559,10 +559,10 @@ const DrillUStudentPortal = () => {
       </section>
 
       {/* footer simple */}
-      <div className="py-3 flex justify-center bg-gradient-to-r from-green-100 to-teal-200 text-white">
-        <p className="">
-          © {new Date().getFullYear()} DrillU Career Success Platform. All
-          rights reserved.
+      <div className="py-3 text-center flex justify-center bg-gradient-to-r from-green-100 to-teal-200 text-white">
+        <p className="sm:inline">
+          © {new Date().getFullYear()} DrillU Career Success Platform.
+          <span className="block sm:inline"> All rights reserved.</span>
         </p>
       </div>
     </div>
