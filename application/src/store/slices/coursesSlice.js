@@ -8,11 +8,15 @@ axios.defaults.headers.post["Content-Type"] = "application/json";
 
 export const fetchCourses = createAsyncThunk(
   "courses/fetchCourses",
-  async (collegeId, { rejectWithValue }) => {
-    console.log("Fetching courses for collegeId:", collegeId);
+  async (params, { rejectWithValue }) => {
+    // Handle both old format (just collegeId) and new format (object with courseType)
+    const collegeId = typeof params === 'string' ? params : params.collegeId;
+    const courseType = typeof params === 'object' ? params.courseType : null;
     
-    // Generate cache key
-    const cacheKey = apiCache.generateKey("/courses", { collegeId });
+    console.log("Fetching courses for collegeId:", collegeId, "courseType:", courseType);
+    
+    // Generate cache key including course type
+    const cacheKey = apiCache.generateKey("/courses", { collegeId, courseType });
     
     try {
       // Check cache first
@@ -23,7 +27,14 @@ export const fetchCourses = createAsyncThunk(
       }
 
       console.log("📡 Making fresh API call to /courses");
-      const response = await axios.get("/courses");
+      
+      // UPDATED: Build URL with course_type parameter if provided
+      let url = "/courses";
+      if (courseType) {
+        url += `?course_type=${courseType}`;
+      }
+      
+      const response = await axios.get(url);
       console.log("API Response:", response);
       
       if (response.data.status === "success") {

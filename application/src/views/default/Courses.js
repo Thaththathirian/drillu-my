@@ -29,13 +29,19 @@ const Courses = () => {
   console.log("Courses Component - collegeId:", collegeId);
   console.log("Courses Component - courseTypeParam:", courseTypeParam);
 
-  useEffect(() => {
-    if (collegeId) {
-      // Only fetch courses - no course types API call
-      console.log("Dispatching fetchCourses action");
+useEffect(() => {
+  if (collegeId) {
+    if (courseTypeParam) {
+      // UPDATED: Make API call with course_type parameter for dynamic nav items
+      console.log("Dispatching fetchCourses with course_type:", courseTypeParam);
+      dispatch(fetchCourses({ collegeId, courseType: courseTypeParam }));
+    } else {
+      // Default: fetch all courses
+      console.log("Dispatching fetchCourses action for all courses");
       dispatch(fetchCourses(collegeId));
     }
-  }, [dispatch, collegeId]);
+  }
+}, [dispatch, collegeId, courseTypeParam]);
 
   // Clear errors after 5 seconds
   useEffect(() => {
@@ -66,10 +72,14 @@ const Courses = () => {
     history.push(`/${collegeId}/dashboard`);
   };
 
-  const handleRetry = () => {
-    dispatch(clearError());
+const handleRetry = () => {
+  dispatch(clearError());
+  if (courseTypeParam) {
+    dispatch(fetchCourses({ collegeId, courseType: courseTypeParam }));
+  } else {
     dispatch(fetchCourses(collegeId));
-  };
+  }
+};
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
