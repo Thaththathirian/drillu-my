@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Spinner, Badge, Button, Alert } from "react-bootstrap";
 import CsLineIcons from "cs-line-icons/CsLineIcons";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCourseModules,
@@ -154,14 +154,19 @@ const StatsCard = ({ icon, label, value, color = "blue" }) => {
 
 const CourseModules = () => {
   const history = useHistory();
+  const location = useLocation();
   const { collegeId, courseId, moduleId } = useParams();
   const dispatch = useDispatch();
+  
   const {
     items: modules,
     status,
     error,
     currentCourseId,
   } = useSelector((state) => state.courseModules);
+
+  // Get dashboard data for course types
+  const { data: dashboardData } = useSelector((state) => state.dashboard);
 
   console.log("CourseModules Component - collegeId:", collegeId);
   console.log("CourseModules Component - courseId:", courseId);
@@ -191,8 +196,42 @@ const CourseModules = () => {
     history.push(`/${collegeId}/tests/${courseId}/${moduleId}`);
   };
 
+  // FIXED: Dynamic back navigation
   const handleGoBack = () => {
+    // Get the referrer URL search params to check if we came from a course type
+    const referrerParams = sessionStorage.getItem('coursesReferrer');
+    
+    // Check if there's a stored referrer (set when navigating from courses)
+    if (referrerParams) {
+      const params = JSON.parse(referrerParams);
+      if (params.courseType) {
+        // Go back to the specific course type page
+        history.push(`/${collegeId}/courses?course_type=${params.courseType}`);
+        return;
+      }
+    }
+    
+    // Default to all courses
     history.push(`/${collegeId}/courses`);
+  };
+
+  // FIXED: Get dynamic back button text
+  const getBackButtonText = () => {
+    const referrerParams = sessionStorage.getItem('coursesReferrer');
+    
+    if (referrerParams) {
+      const params = JSON.parse(referrerParams);
+      if (params.courseType && dashboardData?.course_types) {
+        const courseType = dashboardData.course_types.find(
+          ct => ct.id.toString() === params.courseType.toString()
+        );
+        if (courseType) {
+          return `Back to ${courseType.type}`;
+        }
+      }
+    }
+    
+    return "Back to Courses";
   };
 
   const handleRetry = () => {
@@ -237,11 +276,11 @@ const CourseModules = () => {
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Global User Header */}
+        {/* FIXED: Global User Header with dynamic back button */}
         <GlobalUserHeader
           showBackButton={true}
           onBackClick={handleGoBack}
-          backButtonText="Back to Courses"
+          backButtonText={getBackButtonText()}
         />
 
         <div className="px-3 sm:px-6 lg:px-8 py-6">
@@ -266,11 +305,11 @@ const CourseModules = () => {
   if (status === "failed") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Global User Header */}
+        {/* FIXED: Global User Header with dynamic back button */}
         <GlobalUserHeader
           showBackButton={true}
           onBackClick={handleGoBack}
-          backButtonText="Back to Courses"
+          backButtonText={getBackButtonText()}
         />
 
         <div className="px-3 sm:px-6 lg:px-8 py-6">
@@ -323,11 +362,11 @@ const CourseModules = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Global User Header */}
+      {/* FIXED: Global User Header with dynamic back button */}
       <GlobalUserHeader
         showBackButton={true}
         onBackClick={handleGoBack}
-        backButtonText="Back to Courses"
+        backButtonText={getBackButtonText()}
       />
 
       <div className="px-3 sm:px-6 lg:px-8 py-6">
@@ -442,7 +481,7 @@ const CourseModules = () => {
                     className="rounded-xl"
                   >
                     <CsLineIcons icon="arrow-left" className="me-2" size="15" />
-                    Back to Courses
+                    {getBackButtonText()}
                   </Button>
                   <Button
                     variant="primary"

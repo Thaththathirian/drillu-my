@@ -24,6 +24,7 @@ import testsReducer from "store/slices/testsSlice";
 import testResultsReducer from "store/slices/testResultsSlice";
 import dashboardReducer from "store/slices/dashboardSlice";
 import { REDUX_PERSIST_KEY } from "config.js";
+import courseTypesReducer from "store/slices/courseTypesSlice";
 
 const persistConfig = {
   key: REDUX_PERSIST_KEY,
@@ -47,6 +48,7 @@ const persistedReducer = persistReducer(
 
     // Academic management
     courses: coursesReducer,
+    courseTypes: courseTypesReducer,
     courseModules: courseModulesReducer,
     tests: testsReducer,
     testResults: testResultsReducer,

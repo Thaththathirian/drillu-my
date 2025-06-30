@@ -141,6 +141,7 @@ export const apiCache = new APICache();
 export const CACHE_CONFIG = {
   // Long-term cache for relatively static data
   courses: { ttl: 15 * 60 * 1000 }, // 15 minutes
+  course_types: { ttl: 30 * 60 * 1000 }, // 30 minutes
   course_modules: { ttl: 10 * 60 * 1000 }, // 10 minutes
   dashboard: { ttl: 5 * 60 * 1000 }, // 5 minutes
   

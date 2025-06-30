@@ -6,11 +6,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import CsLineIcons from 'cs-line-icons/CsLineIcons';
 import { USE_MULTI_LANGUAGE } from 'config.js';
 import { menuChangeAttrMobile, menuChangeNavClasses } from 'layout/nav/main-menu/menuSlice';
+import { useDynamicNavigation } from 'hooks/useDynamicNavigation';
 
-const SidebarMenuItems = React.memo(({ menuItems = [] }) =>
-  menuItems.map((item, index) => <SidebarMenuItem key={`menu.${item.path}.${index}`} id={item.path} item={item} />)
-);
-SidebarMenuItems.displayName = 'SidebarMenuItems';
+const SidebarMenuItems = React.memo(({ menuItems = [] }) => {
+  const { generateDynamicMenuItems } = useDynamicNavigation();
+  const dynamicMenuItems = generateDynamicMenuItems(menuItems);
+
+  return dynamicMenuItems.map((item, index) => 
+    <SidebarMenuItem key={`menu.${item.path}.${index}`} id={item.path} item={item} />
+  );
+});
 
 const SidebarMenuItem = ({ item, id }) => {
   const { pathname } = useLocation();
@@ -18,16 +23,13 @@ const SidebarMenuItem = ({ item, id }) => {
   const dispatch = useDispatch();
   const { attrMobile, navClasses } = useSelector((state) => state.menu);
 
-  const isActive = item.path.startsWith('#') ? false : pathname === item.path || pathname.indexOf(`${item.path}/`) > -1;
+  const isActive = item.path.startsWith('#') 
+    ? false 
+    : pathname === item.path || pathname.indexOf(`${item.path}/`) > -1 ||
+      (item.subs && item.subs.some(sub => pathname === sub.to || pathname.indexOf(`${sub.to}/`) > -1));
 
-  // **SIDEBAR AUTO-CLOSE: Function to close mobile sidebar when item is clicked**
   const handleSidebarMenuClose = () => {
-    console.log("🔄 Sidebar item clicked - checking mobile state:", { attrMobile, navClasses });
-    
     if (attrMobile && navClasses && navClasses['mobile-side-in']) {
-      console.log("📱 Sidebar mobile menu detected as open, initiating close sequence");
-      
-      // Start the mobile menu closing animation sequence (same as MainMenuItems)
       let newNavClasses = {
         ...navClasses,
         'mobile-side-out': true,
@@ -54,18 +56,12 @@ const SidebarMenuItem = ({ item, id }) => {
         };
         dispatch(menuChangeNavClasses(newNavClasses));
         dispatch(menuChangeAttrMobile(false));
-        console.log("✅ Sidebar mobile menu closed successfully");
       }, 230);
     }
   };
 
-  // **Navigation click handler**
   const handleNavigationClick = (e) => {
-    console.log("🔗 Sidebar navigation item clicked:", { path: item.path, attrMobile });
-    
-    // Handle mobile menu closing
     if (attrMobile) {
-      // Small delay to ensure navigation starts before closing menu
       setTimeout(() => {
         handleSidebarMenuClose();
       }, 50);
@@ -100,6 +96,7 @@ const SidebarMenuItem = ({ item, id }) => {
       </li>
     );
   }
+
   if (item.isExternal) {
     return (
       <li key={id}>
@@ -114,6 +111,7 @@ const SidebarMenuItem = ({ item, id }) => {
       </li>
     );
   }
+
   return (
     <li>
       <NavLink 

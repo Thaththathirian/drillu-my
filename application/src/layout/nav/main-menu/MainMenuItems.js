@@ -44,25 +44,25 @@ const MainMenuItem = memo(
     // Check if we're on mobile screen size
     const [isMobileScreen, setIsMobileScreen] = useState(false);
     
-   // Get dashboard data for course types
-  const { data: dashboardData } = useSelector((state) => state.dashboard);
-  
-  // Get course types excluding id: 1
-  const getDynamicCourseTypes = () => {
-    if (!dashboardData?.course_types) return [];
-    const filteredTypes = dashboardData.course_types.filter(courseType => courseType.id !== 1);
-    
-    // Only return course types if there are any after filtering out id: 1
-    if (filteredTypes.length === 0) return [];
-    
-    return filteredTypes.map(courseType => ({
-      id: courseType.id,
-      type: courseType.type,
-      path: `/${window.location.pathname.split('/')[1]}/courses/${courseType.id}`,
-      label: courseType.type,
-      icon: "book-open"
-    }));
-  };
+    // Get dashboard data for course types (NO API CALL - just use existing data)
+    const { data: dashboardData } = useSelector((state) => state.dashboard);
+
+    // Get course types excluding id: 1 from dashboard data only
+    const getDynamicCourseTypes = () => {
+      if (!dashboardData?.course_types) return [];
+      const filteredTypes = dashboardData.course_types.filter(courseType => courseType.id !== 1);
+      
+      if (filteredTypes.length === 0) return [];
+      
+      return filteredTypes.map(courseType => ({
+        id: courseType.id,
+        type: courseType.type,
+        path: `/${collegeId}/courses?course_type=${courseType.id}`,
+        label: courseType.type,
+        to: `/${collegeId}/courses?course_type=${courseType.id}`,
+        icon: "book-open"
+      }));
+    };
 
     useEffect(() => {
       const checkMobileScreen = () => {
@@ -319,55 +319,82 @@ const MainMenuItem = memo(
       );
     }
     if (item.isExternal) {
-    return (
-      <li key={id}>
-        <a href={itemPath} target="_blank" rel="noopener noreferrer" onClick={handleNavigationClick}>
-          {getLabel(item.icon, item.label)}
-        </a>
-      </li>
-    );
-  }
-
-  // ADD THIS: Special handling for Courses menu item
-  if (item.label === "Courses") {
-    const courseTypes = getDynamicCourseTypes();
-    const currentPath = pathname;
-    const isCoursesActive = currentPath === itemPath;
-    
-    return (
-      <>
-        {/* Original Courses nav item */}
-        <li>
-          <NavLink
-            to={itemPath}
-            className={classNames({ active: isCoursesActive })}
-            activeClassName=""
-            onClick={handleNavigationClick}
-          >
+      return (
+        <li key={id}>
+          <a href={itemPath} target="_blank" rel="noopener noreferrer" onClick={handleNavigationClick}>
             {getLabel(item.icon, item.label)}
-          </NavLink>
+          </a>
         </li>
-        
-        {/* Dynamic course type nav items - only show if there are course types */}
-        {courseTypes.map((courseType) => {
-          const isCourseTypeActive = currentPath.includes(`/courses/${courseType.id}`);
-          return (
-            <li key={`course-type-${courseType.id}`}>
-              <NavLink
-                to={courseType.path}
-                className={classNames({ active: isCourseTypeActive })}
-                activeClassName=""
-                onClick={handleNavigationClick}
-              >
-                <CsLineIcons icon={courseType.icon} size={18} className="cs-icon icon" />{" "}
-                <span className="label">{courseType.label}</span>
-              </NavLink>
-            </li>
-          );
-        })}
-      </>
-    );
+      );
+    }
+
+    // FIXED: Special handling for Courses menu item
+if (item.label === "Courses") {
+  const courseTypes = getDynamicCourseTypes();
+  const currentPath = pathname;
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentCourseType = urlParams.get('course_type');
+  
+  // Check if we're in a courses-related route
+  const isInCoursesRoute = currentPath.includes('/courses') || 
+                          currentPath.includes('/course_modules') || 
+                          currentPath.includes('/tests');
+  
+  // Get the stored referrer to maintain active state in subroutes
+  const referrerParams = sessionStorage.getItem('coursesReferrer');
+  let activeNavigationCourseType = currentCourseType;
+  
+  // If we're in a subroute and have referrer info, use that for active state
+  if (!currentCourseType && referrerParams && 
+      (currentPath.includes('/course_modules') || currentPath.includes('/tests'))) {
+    try {
+      const params = JSON.parse(referrerParams);
+      activeNavigationCourseType = params.courseType;
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
   }
+  
+  return (
+    <>
+      {/* Original Courses nav item */}
+      <li>
+        <NavLink
+          to={itemPath}
+          className={classNames({ 
+            active: isInCoursesRoute && !activeNavigationCourseType // Only active when no course_type
+          })}
+          activeClassName=""
+          onClick={handleNavigationClick}
+        >
+          {getLabel(item.icon, item.label)}
+        </NavLink>
+      </li>
+      
+      {/* Dynamic course type nav items */}
+      {courseTypes.map((courseType) => {
+        // Check if this course type is currently active
+        const isCourseTypeActive = isInCoursesRoute && 
+          activeNavigationCourseType && 
+          activeNavigationCourseType.toString() === courseType.id.toString();
+          
+        return (
+          <li key={`course-type-${courseType.id}`}>
+            <NavLink
+              to={courseType.path}
+              className={classNames({ active: isCourseTypeActive })}
+              activeClassName=""
+              onClick={handleNavigationClick}
+            >
+              <CsLineIcons icon={courseType.icon} size={18} className="cs-icon icon" />{" "}
+              <span className="label">{courseType.label}</span>
+            </NavLink>
+          </li>
+        );
+      })}
+    </>
+  );
+}
 
     if (!isSubItem || menuPlacement === MENU_PLACEMENT.Vertical) {
       return (
