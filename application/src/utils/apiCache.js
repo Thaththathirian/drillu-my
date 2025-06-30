@@ -1,3 +1,4 @@
+import React from 'react';
 // utils/apiCache.js - Global API Cache System
 
 class APICache {

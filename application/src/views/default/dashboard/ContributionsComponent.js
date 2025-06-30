@@ -200,7 +200,7 @@ const ContributionsComponent = ({ contributions }) => {
         </div>
 
         {/* Chart Type Toggle */}
-        <div className="flex rounded-xl border border-gray-300 overflow-hidden">
+        <div className="inline-flex w-max rounded-xl border border-gray-300 overflow-hidden">
           <button
             onClick={() => setChartType('bar')}
             className={`px-4 py-2 text-sm font-medium transition-colors flex items-center ${
