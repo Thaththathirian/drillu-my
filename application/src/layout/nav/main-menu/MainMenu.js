@@ -24,6 +24,7 @@ import {
   isDeeplyDiffBehaviourStatus,
   isDeeplyDiffPlacementStatus,
 } from "./helper";
+import { useDashboardData } from 'hooks/useDashboardData';
 
 const MainMenu = () => {
   const dispatch = useDispatch();
@@ -39,6 +40,9 @@ const MainMenu = () => {
   const { isLogin, currentUser } = useSelector((state) => state.auth);
   const scrolled = useWindowScroll();
   const { width } = useWindowSize();
+  
+  //Ensure dashboard data is loaded for navigation
+useDashboardData();
 
   const menuItemsMemo = useMemo(
     () =>

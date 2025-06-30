@@ -40,9 +40,29 @@ const MainMenuItem = memo(
     const { showingNavMenu } = useSelector((state) => state.layout);
     const { pathname } = useLocation();
     const { collegeId } = useParams();
-
+    
     // Check if we're on mobile screen size
     const [isMobileScreen, setIsMobileScreen] = useState(false);
+    
+   // Get dashboard data for course types
+  const { data: dashboardData } = useSelector((state) => state.dashboard);
+  
+  // Get course types excluding id: 1
+  const getDynamicCourseTypes = () => {
+    if (!dashboardData?.course_types) return [];
+    const filteredTypes = dashboardData.course_types.filter(courseType => courseType.id !== 1);
+    
+    // Only return course types if there are any after filtering out id: 1
+    if (filteredTypes.length === 0) return [];
+    
+    return filteredTypes.map(courseType => ({
+      id: courseType.id,
+      type: courseType.type,
+      path: `/${window.location.pathname.split('/')[1]}/courses/${courseType.id}`,
+      label: courseType.type,
+      icon: "book-open"
+    }));
+  };
 
     useEffect(() => {
       const checkMobileScreen = () => {
@@ -299,19 +319,56 @@ const MainMenuItem = memo(
       );
     }
     if (item.isExternal) {
-      return (
-        <li key={id}>
-          <a 
-            href={itemPath} 
-            target="_blank" 
-            rel="noopener noreferrer"
+    return (
+      <li key={id}>
+        <a href={itemPath} target="_blank" rel="noopener noreferrer" onClick={handleNavigationClick}>
+          {getLabel(item.icon, item.label)}
+        </a>
+      </li>
+    );
+  }
+
+  // ADD THIS: Special handling for Courses menu item
+  if (item.label === "Courses") {
+    const courseTypes = getDynamicCourseTypes();
+    const currentPath = pathname;
+    const isCoursesActive = currentPath === itemPath;
+    
+    return (
+      <>
+        {/* Original Courses nav item */}
+        <li>
+          <NavLink
+            to={itemPath}
+            className={classNames({ active: isCoursesActive })}
+            activeClassName=""
             onClick={handleNavigationClick}
           >
             {getLabel(item.icon, item.label)}
-          </a>
+          </NavLink>
         </li>
-      );
-    }
+        
+        {/* Dynamic course type nav items - only show if there are course types */}
+        {courseTypes.map((courseType) => {
+          const isCourseTypeActive = currentPath.includes(`/courses/${courseType.id}`);
+          return (
+            <li key={`course-type-${courseType.id}`}>
+              <NavLink
+                to={courseType.path}
+                className={classNames({ active: isCourseTypeActive })}
+                activeClassName=""
+                onClick={handleNavigationClick}
+              >
+                <CsLineIcons icon={courseType.icon} size={18} className="cs-icon icon" />{" "}
+                <span className="label">{courseType.label}</span>
+              </NavLink>
+            </li>
+          );
+        })}
+      </>
+    );
+  }
+
     if (!isSubItem || menuPlacement === MENU_PLACEMENT.Vertical) {
       return (
         <li>

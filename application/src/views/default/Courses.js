@@ -5,16 +5,31 @@ import { useHistory, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCourses, clearError } from "store/slices/coursesSlice";
 import GlobalUserHeader from "./GlobalUserHeader";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 
 const Courses = () => {
   const history = useHistory();
-  const { collegeId } = useParams();
+  const location = useLocation();
+  const { collegeId, courseTypeId } = useParams();
   const dispatch = useDispatch();
+  
   const {
     items: courses,
     status,
     error,
   } = useSelector((state) => state.courses);
+
+  const { data: dashboardData } = useSelector((state) => state.dashboard);
+
+  // ADD THIS: Get course type filter from URL
+  const urlParams = new URLSearchParams(location.search);
+  const courseTypeFilter = urlParams.get('type');
+  
+  // ADD THIS: Get current course type name
+  const currentCourseType = dashboardData?.course_types?.find(
+    ct => ct.id === parseInt(courseTypeId)
+  );
+
 
   console.log("Courses Component - collegeId:", collegeId);
   console.log("Courses Component - status:", status);
@@ -42,9 +57,24 @@ const Courses = () => {
     history.push(`/${collegeId}/course_modules/${courseId}`);
   };
 
+  const displayedCourses = courseTypeId 
+    ? courses.filter(course => course.course_type_id === parseInt(courseTypeId))
+    : courses;
+
+  // MODIFY THIS: Update your handleGoBack function
   const handleGoBack = () => {
-    history.push(`/${collegeId}/dashboard`);
+    if (courseTypeId) {
+      // Go back to all courses if viewing specific course type
+      history.push(`/${collegeId}/courses`);
+    } else {
+      // Go back to dashboard
+      history.push(`/${collegeId}/dashboard`);
+    }
   };
+
+   const pageTitle = currentCourseType 
+    ? `${currentCourseType.type}` 
+    : "Courses";
 
   const handleRetry = () => {
     dispatch(clearError());
@@ -154,8 +184,20 @@ const Courses = () => {
       <GlobalUserHeader
         showBackButton={true}
         onBackClick={handleGoBack}
-        backButtonText="Dashboard"
+        customTitle={pageTitle}
+        className="mb-6"
+        // backButtonText="Dashboard"
       />
+
+      {/* ADD THIS: Course type filter indicator */}
+      {currentCourseType && (
+        <div className="container mx-auto px-4 mb-4">
+          <Badge bg="primary" className="px-3 py-2">
+            <CsLineIcons icon="filter" className="me-2" size="14" />
+            Showing: {currentCourseType.type}
+          </Badge>
+        </div>
+      )}
 
       <div className="px-2 sm:px-5 lg:px-8 py-5">
         <div className="max-w-7xl mx-auto">
@@ -265,7 +307,7 @@ const Courses = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {courses.map((course, index) => (
+                      {displayedCourses.map((course, index) => (
                         <tr
                           key={course.id || index}
                           className="hover:bg-gray-50 transition-all duration-200"
@@ -362,7 +404,7 @@ const Courses = () => {
               {/* Mobile Card View - Visible on mobile and tablet */}
               <div className="d-lg-none">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {courses.map((course, index) => (
+                  {displayedCourses.map((course, index) => (
                     <div
                       key={course.id || index}
                       className="bg-white rounded-2xl p-4 hover:shadow-lg transition-all duration-300 h-full"

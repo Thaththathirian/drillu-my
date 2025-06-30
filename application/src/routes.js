@@ -98,6 +98,13 @@ const routesAndMenuItems = {
       exact: true,
       to: replaceCollegeIdInPath("/:collegeId/courses"),
     },
+    // Dynamic course types
+    {
+      path: "/:collegeId/courses/:courseTypeId",
+      component: Courses,
+      exact: true,
+      to: replaceCollegeIdInPath("/:collegeId/courses/:courseTypeId"),
+    },
     {
       path: "/:collegeId/labs",
       component: Labs,
