@@ -81,14 +81,26 @@ const handleRetry = () => {
   }
 };
 
+  // const formatDate = (dateString) => {
+  //   if (!dateString) return "N/A";
+  //   try {
+  //     return new Date(dateString).toLocaleDateString();
+  //   } catch {
+  //     return dateString;
+  //   }
+  // };
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch {
-      return dateString;
-    }
-  };
+  if (!dateString) return "N/A";
+  try {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // months are 0-based
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return "Invalid date";
+  }
+};
 
   const isExpired = (expiryDate) => {
     if (!expiryDate) return false;
@@ -207,7 +219,9 @@ const handleRetry = () => {
                         {filteredCourses.map((course, index) => (
                           <tr key={course.id || index} className="hover:bg-gray-50 transition-all duration-200">
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {index + 1}
+                              <span className="text-sm text-gray-500">
+                                {course.course_code || index + 1}
+                              </span>
                             </td>
                             <td className="px-6 py-4">
                               <div className="d-flex align-items-center">
@@ -216,9 +230,7 @@ const handleRetry = () => {
                                   <div className="font-weight-semibold text-gray-900">
                                     {course.name || "Untitled Course"}
                                   </div>
-                                  {course.code && (
-                                    <div className="text-sm text-gray-500">{course.code}</div>
-                                  )}
+                                  
                                 </div>
                               </div>
                             </td>
@@ -226,24 +238,33 @@ const handleRetry = () => {
                               {course.description || "No description available"}
                             </td>
                             <td className="px-6 py-4 text-sm">
-                              <span className={`badge ${isExpired(course.expiry_date) ? 'bg-danger' : 'bg-success'}`}>
-                                {formatDate(course.expiry_date)}
+                              <span className={`badge mb-1 d-flex align-items-center justify-content-center ${isExpired(course.course_expiry) ? 'bg-danger' : 'bg-success'}`}
+                              style={{ 
+                                minHeight: '20px', 
+                                paddingTop: '0.3em', 
+                                paddingBottom: '0.3em',
+                                lineHeight: '1.25'
+                              }}>
+                                {isExpired(course.course_expiry) ? "Expired" : "Active"}
                               </span>
+                              <div className="text-xs text-muted mt-1">
+                                {formatDate(course.course_expiry)}
+                              </div>
                             </td>
                             <td className="px-6 py-4">
                               <Button
-                                variant={isExpired(course.expiry_date) ? "outline-secondary" : "primary"}
+                                variant={isExpired(course.course_expiry) ? "outline-secondary" : "primary"}
                                 size="sm"
                                 onClick={() => handleGoToTests(course.id)}
-                                disabled={isExpired(course.expiry_date)}
+                                disabled={isExpired(course.course_expiry)}
                                 className="me-2"
                               >
                                 <CsLineIcons 
-                                  icon={isExpired(course.expiry_date) ? "lock" : "play"} 
+                                  icon={isExpired(course.course_expiry) ? "lock" : "play"} 
                                   size="14" 
                                   className="me-1" 
                                 />
-                                {isExpired(course.expiry_date) ? "Expired" : "View Modules"}
+                                {isExpired(course.course_expiry) ? "Expired" : "View Modules"}
                               </Button>
                             </td>
                           </tr>
@@ -273,8 +294,17 @@ const handleRetry = () => {
                                   <Badge bg="primary" className="text-xs">
                                     Course #{index + 1}
                                   </Badge>
-                                  <Badge bg={isExpired(course.expiry_date) ? "danger" : "success"}>
-                                    {isExpired(course.expiry_date) ? "Expired" : "Active"}
+                                  <Badge 
+                                    bg={isExpired(course.course_expiry) ? "danger" : "success"}
+                                    className="d-flex align-items-center justify-content-center"
+                                    style={{ 
+                                      minHeight: '24px', 
+                                      paddingTop: '0.3em', 
+                                      paddingBottom: '0.3em',
+                                      lineHeight: '1.25'
+                                    }}
+                                  >
+                                    {isExpired(course.course_expiry) ? "Expired" : "Active"}
                                   </Badge>
                                 </div>
                               </div>
@@ -286,24 +316,24 @@ const handleRetry = () => {
                               {course.description || "No description available"}
                             </p>
                             <div className="text-xs text-gray-500 mb-4">
-                              <strong>Expiry:</strong> {formatDate(course.expiry_date)}
+                              <strong>Expiry:</strong> {formatDate(course.course_expiry)}
                             </div>
                           </div>
 
                           <div className="mt-auto">
                             <Button
-                              variant={isExpired(course.expiry_date) ? "outline-secondary" : "primary"}
+                              variant={isExpired(course.course_expiry) ? "outline-secondary" : "primary"}
                               size="sm"
                               onClick={() => handleGoToTests(course.id)}
-                              disabled={isExpired(course.expiry_date)}
+                              disabled={isExpired(course.course_expiry)}
                               className="w-100"
                             >
                               <CsLineIcons 
-                                icon={isExpired(course.expiry_date) ? "lock" : "play"} 
+                                icon={isExpired(course.course_expiry) ? "lock" : "play"} 
                                 size="14" 
                                 className="me-1" 
                               />
-                              {isExpired(course.expiry_date) ? "Expired" : "View Modules"}
+                              {isExpired(course.course_expiry) ? "Expired" : "View Modules"}
                             </Button>
                           </div>
                         </div>
