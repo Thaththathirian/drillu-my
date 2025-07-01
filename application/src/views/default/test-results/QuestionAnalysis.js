@@ -216,33 +216,55 @@ const QuestionCard = ({
   };
 
   // Format correct answers specifically - FIXED FUNCTION
-  const formatCorrectAnswers = (correctAnswerIds, options) => {
-    if (!correctAnswerIds || correctAnswerIds.length === 0) return "Not available";
-    
-    return correctAnswerIds.map(answerId => {
-      // Find the option that matches this correct answer ID
-      const option = options?.find(opt => 
-        opt.id === answerId || 
-        opt.id === parseInt(answerId) ||
-        (typeof opt.id === 'string' && opt.id === String(answerId)) ||
+const formatCorrectAnswers = (correctAnswerIds, options) => {
+  if (!correctAnswerIds || correctAnswerIds.length === 0) {
+    // If no correctAnswerIds provided, find correct answers from options
+    if (options && Array.isArray(options)) {
+      const correctOptions = options.filter(opt => 
         opt.is_correct === true ||
         opt.is_correct === 1 ||
         opt.is_correct === "1"
       );
       
-      if (option) {
-        const optionIndex = options.findIndex(opt => opt.id === option.id);
-        const letter = optionIndex !== -1 ? getOptionLetter(optionIndex) : 'A';
-        const text = option.option_text || option.text || String(answerId);
-        
-        return /\.(jpg|jpeg|png|gif|webp)$/i.test(text) ?
-          `${letter}: ![Image Option](${text})` :
-          `${letter}: ${text}`;
+      if (correctOptions.length > 0) {
+        return correctOptions.map(option => {
+          const optionIndex = options.findIndex(opt => opt.id === option.id);
+          const letter = optionIndex !== -1 ? getOptionLetter(optionIndex) : 'A';
+          const text = option.option_text || option.text || String(option.id);
+          
+          return /\.(jpg|jpeg|png|gif|webp)$/i.test(text) ?
+            `${letter}: ![Image Option](${text})` :
+            `${letter}: ${text}`;
+        }).join(", ");
       }
+    }
+    return "Not available";
+  }
+  
+  return correctAnswerIds.map(answerId => {
+    // Find the option that matches this correct answer ID
+    const option = options?.find(opt => 
+      opt.id === answerId || 
+      opt.id === parseInt(answerId) ||
+      (typeof opt.id === 'string' && opt.id === String(answerId)) ||
+      opt.is_correct === true ||
+      opt.is_correct === 1 ||
+      opt.is_correct === "1"
+    );
+    
+    if (option) {
+      const optionIndex = options.findIndex(opt => opt.id === option.id);
+      const letter = optionIndex !== -1 ? getOptionLetter(optionIndex) : 'A';
+      const text = option.option_text || option.text || String(answerId);
       
-      return String(answerId);
-    }).join(", ");
-  };
+      return /\.(jpg|jpeg|png|gif|webp)$/i.test(text) ?
+        `${letter}: ![Image Option](${text})` :
+        `${letter}: ${text}`;
+    }
+    
+    return String(answerId);
+  }).join(", ");
+};
 
   // Calculate options layout
   const getOptionsGridClass = (options) => {
@@ -447,10 +469,14 @@ const QuestionAnalysis = ({ questions, solutions, submission }) => {
       }
 
       let correctAnswers = [];
-      if (solution?.correct_answer && Array.isArray(solution.correct_answer)) {
-        correctAnswers = solution.correct_answer;
-      }
-
+if (solution?.correct_answer && Array.isArray(solution.correct_answer)) {
+  correctAnswers = solution.correct_answer;
+} else if (solution?.options) {
+  // If no correct_answer array, extract from options
+  correctAnswers = solution.options
+    .filter(opt => opt.is_correct === true || opt.is_correct === 1 || opt.is_correct === "1")
+    .map(opt => opt.id);
+}
       // Check if question was attempted
       const isAttempted = userAnswers && userAnswers.length > 0;
       const isCorrect = parseInt(solution?.score || 0) > 0;

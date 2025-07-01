@@ -283,7 +283,7 @@ const CourseModules = () => {
           backButtonText={getBackButtonText()}
         />
 
-        <div className="px-3 sm:px-6 lg:px-8 py-6">
+        <div className="px-2 sm:px-5 lg:px-8 py-5">
           <div className="max-w-7xl mx-auto">
             <div
               className="flex items-center justify-center"
@@ -312,7 +312,7 @@ const CourseModules = () => {
           backButtonText={getBackButtonText()}
         />
 
-        <div className="px-3 sm:px-6 lg:px-8 py-6">
+        <div className="px-2 sm:px-5 lg:px-8 py-5">
           <div className="max-w-7xl mx-auto">
             {/* Page Header */}
             <div className="flex items-center mb-6">
@@ -369,7 +369,7 @@ const CourseModules = () => {
         backButtonText={getBackButtonText()}
       />
 
-      <div className="px-3 sm:px-6 lg:px-8 py-6">
+      <div className="px-2 sm:px-5 lg:px-8 py-5">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">

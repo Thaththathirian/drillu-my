@@ -154,13 +154,17 @@ const handleRetry = () => {
         backButtonText="Back to Dashboard"
       />
       
-      <div className="container-fluid px-3 py-4">
+      <div className="container-fluid px-2 sm:px-5 lg:px-8 py-5">
         {/* FIXED: Header Section with title in correct position */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className="d-flex justify-content-between align-items-center mb-5 2xl:mx-2.5">
           <div>
-            <h2 className="h4 mb-0 d-inline-block text-gray-800 font-weight-bold">
+            <h1 className="text-2xl font-bold text-gray-900">
               {pageTitle}
-            </h2>
+            </h1>
+            <p className="text-gray-600 text-sm mt-1">
+              {filteredCourses?.length || 0} course
+              {filteredCourses?.length !== 1 ? "s" : ""} available
+            </p>
           </div>
         </div>
 
